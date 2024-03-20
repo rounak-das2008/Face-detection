@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Head Pose Estimation</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        body {
+            text-align: center;
+            background-color: #181a1b;
+            font-family: Arial, sans-serif;
+        }
+        #videoFeed {
+            max-width: 70%;
+            height: auto;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        #headPosition {
+            font-size: 24px;
+            color: #f4f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h2 id="headPosition">Real-time Head Pose Estimation</h2>
+    <img id="videoFeed" src="/video_feed" alt="Head Pose Video Feed">
+    <div id="headPosition">Head Position: <span id="pose">Forward</span></div>
+
+    <script>
+        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+        socket.on('headpose', function(msg) {
+            document.getElementById('pose').textContent = msg.data;
+        });
+    </script>
+</body>
+</html>

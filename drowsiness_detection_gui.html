@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drowsiness Detection and Head Pose Estimation</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h1>Drowsiness Detection and Head Pose Estimation</h1>
+    
+    <div>
+        <label for="videoInput">Select Video:</label>
+        <input type="file" id="videoInput" accept="video/*">
+    </div>
+
+    <div>
+        <button onclick="startProcessing()">Start Processing</button>
+    </div>
+
+    <div id="output">
+        <!-- Video and processing results will be displayed here -->
+        <video id="videoPlayer" width="600" height="400" controls></video>
+        <canvas id="canvas" width="600" height="400"></canvas>
+    </div>
+
+    <script>
+        function startProcessing() {
+            var videoInput = $("#videoInput")[0];
+            var videoFile = videoInput.files[0];
+
+            if (videoFile) {
+                $("#output").html("Video processing started...");
+
+                // Display the selected video
+                var videoPlayer = $("#videoPlayer")[0];
+                var videoURL = URL.createObjectURL(videoFile);
+                videoPlayer.src = videoURL;
+
+                // Code to start video processing and display output
+                // Replace the placeholder code with the actual logic for processing the video
+                // For example, you can use a canvas to draw processing results
+                var canvas = $("#canvas")[0];
+                var ctx = canvas.getContext("2d");
+
+                // Simulate processing by drawing a rectangle on the canvas
+                ctx.fillStyle = "red";
+                ctx.fillRect(50, 50, 100, 100);
+
+                $("#output").append("<p>Processing complete!</p>");
+            } else {
+                $("#output").html("Please select a video file.");
+            }
+        }
+    </script>
+</body>
+</html>

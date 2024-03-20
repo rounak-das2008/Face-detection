@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yawn Detection</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #181a1b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4 text-white">Yawn Detection</h1>
+        <p class="text-white">Video feed:</p>
+        <img src="{{ url_for('video_feed') }}" width="600">
+        <p class="text-white">Yawn Detected: <span id="yawn_status">No</span></p>
+        <div id="alert_message" class="alert alert-warning" style="display:none;">
+            <h4 class="alert-heading">Yawn Detected!</h4>
+            <p class="mb-0">You might be feeling sleepy.</p>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
+    <script>
+        const yawnStatusElement = document.getElementById("yawn_status");
+        const alertMessageElement = document.getElementById("alert_message");
+        const socket = io.connect("http://" + document.domain + ":" + location.port);
+        socket.on("connect", () => {
+            console.log("Connected to the server for yawn detection.");
+        });
+
+        socket.on("update_yawn", (yawn_distance) => {
+            if (yawn_distance > 24) { // Assuming 24 is the threshold for a yawn
+                yawnStatusElement.textContent = "Yes";
+                alertMessageElement.style.display = "block";
+            } else {
+                yawnStatusElement.textContent = "No";
+                alertMessageElement.style.display = "none";
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drowsiness Detection</title>
+    <!-- Bootstrap CDN link for styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- Chart.js CDN link -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #181a1b; /* Set background color to blue */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4 text-white">Drowsiness Detection</h1>
+        <p class="text-white">Placeholder for video feed:</p>
+        <img src="{{ url_for('video_feed') }}" width="600">
+        <p class="text-white">EAR Value: <span id="ear_value">0.00</span></p>
+        <div id="alert_message" class="alert alert-danger" style="display:none;">
+            <h4 class="alert-heading">Drowsiness Alert!</h4>
+            <p class="mb-0">Stay alert and take a break.</p>
+        </div>
+        <canvas id="earChart" width="400" height="200"></canvas>
+    </div>
+
+    <!-- Bootstrap and Socket.IO scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
+    <script>
+        const earValueElement = document.getElementById("ear_value");
+        const alertMessageElement = document.getElementById("alert_message");
+        const socket = io.connect("http://" + document.domain + ":" + location.port);
+        const earChartElement = document.getElementById("earChart");
+        let alertStartTime;
+        
+        // Initialize the Chart
+        const ctx = earChartElement.getContext("2d");
+        const earChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "EAR Value",
+                    data: [],
+                    backgroundColor: "rgba(75, 192, 192, 0.2)",
+                    borderColor: "rgba(75, 192, 192, 1)",
+                    borderWidth: 1,
+                    fill: false,
+                }]
+            },
+            options: {
+                scales: {
+                    x: [{
+                        type: 'linear',
+                        position: 'bottom'
+                    }]
+                }
+            }
+        });
+
+        socket.on("connect", () => {
+            console.log("Connected to the server");
+        });
+
+        socket.on("update_ear", (ear) => {
+            const formattedEar = parseFloat(ear).toFixed(2);
+            earValueElement.textContent = formattedEar;
+
+            // Update the Chart
+            const currentTime = new Date().toLocaleTimeString();
+            earChart.data.labels.push(currentTime);
+            earChart.data.datasets[0].data.push(ear);
+            earChart.update();
+
+            // Check if EAR is below 0.18 and initiate or update the alert timing
+            if (ear < 0.18) {
+                // If the alert hasn't started, set the start time
+                if (!alertStartTime) {
+                    alertStartTime = Date.now();
+                } else {
+                    // If the alert has started, check if 2 seconds have passed
+                    const elapsedTime = Date.now() - alertStartTime;
+                    if (elapsedTime >= 2000) {
+                        // Show alert message
+                        alertMessageElement.style.display = "block";
+                    }
+                }
+            } else {
+                // If EAR is above the threshold, hide the alert and reset the timing
+                alertMessageElement.style.display = "none";
+                alertStartTime = null;
+            }
+        });
+    </script>
+</body>
+</html>
